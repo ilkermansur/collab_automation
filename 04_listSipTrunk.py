@@ -31,20 +31,18 @@ def show_history():
     for item in [history.last_sent, history.last_received]:
         print(etree.tostring(item["envelope"], encoding="unicode", pretty_print=True))  
 
-
-listSipTrunk_info = axl.listSipTrunk(searchCriteria={'name':'%'}, returnedTags={'name':'',
-                                                                                'product' : '',
-                                                                                'model' : '',
-                                                                                'class' : '',
-                                                                                'protocol' : '',
-                                                                                'protocolSide' : '',
-                                                                                'locationName' : '',
-                                                                                'securityProfileName' : '',
-                                                                                'sipProfileName' : '',
-                                                                                'presenceGroupName' : ''
-
-                                                                                })
-
+listSipTrunk_info = axl.listSipTrunk(searchCriteria={'name':'%'},
+                                       returnedTags={'name':'',
+                                                 'product' : '',
+                                                   'model' : '',
+                                                   'class' : '',
+                                                'protocol' : '',
+                                            'protocolSide' : '',
+                                            'locationName' : '',
+                                     'securityProfileName' : '',
+                                          'sipProfileName' : '',
+                                        'presenceGroupName' : ''
+                                                    })
 try:
     for trunk in listSipTrunk_info['return']['sipTrunk']:
         print (trunk)
