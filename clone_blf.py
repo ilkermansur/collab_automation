@@ -31,53 +31,42 @@ def show_history():
     for item in [history.last_sent, history.last_received]:
         print(etree.tostring(item["envelope"], encoding="unicode", pretty_print=True))  
 
-def get_blf (device_name):
+########################################### PHONE BLF INFO ###########################################
 
+def phone_blf_info (device_name):
     try:
-        get_phone_blf_infos = axl.getPhone (name = device_name, returnedTags={'name':'',
-                                                                                    'model':'',
-                                                                                    'busyLampFields': {
-                                                                                        'busyLampField': {
-                                                                                            'blfDest':'',
-                                                                                            'blfDirn':'',
-                                                                                            'routePartition':'',
-                                                                                            'label': '',
-                                                                                            'index': '',
-                                                                                            'associatedBlfSdFeatures':{
-                                                                                                'feature': ''
-                                                                                            }
-                                                                                    }
-                                                                                    }})
+
+        get_phone_blf_infos = axl.getPhone (name = device_name)
         
-        print(get_phone_blf_infos['return']['phone']['busyLampFields']['busyLampField'])
-        
+        if get_phone_blf_infos['return']['phone']['busyLampFields'] != None:
+            blf_info = get_phone_blf_infos['return']['phone']['busyLampFields']['busyLampField']
+            return blf_info
+        else: 
+            with open ("process_log.txt", "a") as f:
+                log = f"there is no blf on {device_name}\n"
+                f.write(log)
+                return get_phone_blf_infos['return']['phone']['busyLampFields']
     except Fault as f:
         print (f)
 
+########################################### CLONE PHONE BLF ###########################################
 
-def clone_blfdials(old_device_name, new_device_name):
-
+def clone_blf_info(device_name, new_device_name):
     try:
-        get_phone_blf_infos = axl.getPhone (name = old_device_name, returnedTags={'name':'',
-                                                                                    'model':'',
-                                                                                    'busyLampFields': {
-                                                                                        'busyLampField': {
-                                                                                            'blfDest':'',
-                                                                                            'blfDirn':'',
-                                                                                            'routePartition':'',
-                                                                                            'label': '',
-                                                                                            'index': '',
-                                                                                            'associatedBlfSdFeatures':{
-                                                                                                'feature': ''
-                                                                                            }
-                                                                                    }
-                                                                                    }})
-        
-        get_phone_blf = get_phone_blf_infos['return']['phone']['busyLampFields']['busyLampField']
+        blf_list = phone_blf_info(device_name)
+        if blf_list != None:
+            axl.updatePhone(name=new_device_name, busyLampFields= {'busyLampField' : blf_list})
 
-        axl.updatePhone(name=new_device_name, busyLampFields= {'busyLampField' : get_phone_blf})
+            with open ("process_log.txt", "a") as f:
+                number_of_blf = len(blf_list)
+                log = f" {number_of_blf} adet blf {device_name} den {new_device_name} e taşındı."
+                f.write(log)
 
     except Fault as f:
         print (f)
 
-clone_blfdials(old_device_name='SEP04EB40B9542C', new_device_name='SEP111122223333')
+################################################# USAGE #################################################
+
+if __name__ == "__main__":
+
+    clone_blf_info(device_name="SEP04EB40B9542C", new_device_name="SEP111122223333")
